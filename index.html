@@ -8,7 +8,7 @@
 /* Layout: one working table under a compact summary strip; filters sit above the table. */
 :root{
   --bg:#f5f7f6; --surface:#ffffff; --fg:#17201d; --muted:#5b6762; --line:#dde3e0;
-  --accent:#0f6b5c; --accent-soft:#e2f1ed;
+  --accent:#0f6b5c; --accent-soft:#e2f1ed; --stripe:#f0f4f2;
   --yes:#2f6fb3; --yes-bg:#e5eef8;
   --hom:#9a6400; --hom-bg:#fbf0d9;
   --no:#0f6b5c; --no-bg:#dcefe9;
@@ -19,12 +19,12 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#111715; --surface:#18201d; --fg:#e4ebe8; --muted:#9aa8a2; --line:#2a3531;
-  --accent:#5cc7b0; --accent-soft:#1d3a33;
+  --accent:#5cc7b0; --accent-soft:#1d3a33; --stripe:#1f2925;
   --yes:#8fb9ea; --yes-bg:#1d2b3c; --hom:#e7b65c; --hom-bg:#3a2e17;
   --no:#6fd4bd; --no-bg:#163a32; --unk:#a9adb3; --unk-bg:#2a2e33; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111715; --surface:#18201d; --fg:#e4ebe8; --muted:#9aa8a2; --line:#2a3531;
-  --accent:#5cc7b0; --accent-soft:#1d3a33;
+  --accent:#5cc7b0; --accent-soft:#1d3a33; --stripe:#1f2925;
   --yes:#8fb9ea; --yes-bg:#1d2b3c; --hom:#e7b65c; --hom-bg:#3a2e17;
   --no:#6fd4bd; --no-bg:#163a32; --unk:#a9adb3; --unk-bg:#2a2e33; color-scheme:dark}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;
@@ -53,6 +53,8 @@ th{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.05em
 th button{all:unset;cursor:pointer}
 th button:focus-visible,a:focus-visible,.stat:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even) td{background:var(--stripe)}
+tbody tr:hover td{background:var(--accent-soft)}
 td.co a{font-weight:600;color:var(--fg);text-decoration:none}
 td.co a:hover{text-decoration:underline;color:var(--accent)}
 td.biz{color:var(--muted);font-size:14px;min-width:48ch;max-width:48ch}
