@@ -1,0 +1,240 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Who needs GTM leaders?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one working table under a compact summary strip; filters sit above the table. */
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --fg:#17201d; --muted:#5b6762; --line:#dde3e0;
+  --accent:#0f6b5c; --accent-soft:#e2f1ed;
+  --yes:#2f6fb3; --yes-bg:#e5eef8;
+  --hom:#9a6400; --hom-bg:#fbf0d9;
+  --no:#0f6b5c; --no-bg:#dcefe9;
+  --unk:#6b6f75; --unk-bg:#eceef0;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111715; --surface:#18201d; --fg:#e4ebe8; --muted:#9aa8a2; --line:#2a3531;
+  --accent:#5cc7b0; --accent-soft:#1d3a33;
+  --yes:#8fb9ea; --yes-bg:#1d2b3c; --hom:#e7b65c; --hom-bg:#3a2e17;
+  --no:#6fd4bd; --no-bg:#163a32; --unk:#a9adb3; --unk-bg:#2a2e33; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111715; --surface:#18201d; --fg:#e4ebe8; --muted:#9aa8a2; --line:#2a3531;
+  --accent:#5cc7b0; --accent-soft:#1d3a33;
+  --yes:#8fb9ea; --yes-bg:#1d2b3c; --hom:#e7b65c; --hom-bg:#3a2e17;
+  --no:#6fd4bd; --no-bg:#163a32; --unk:#a9adb3; --unk-bg:#2a2e33; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:22px}
+header{display:grid;gap:6px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-stretch:85%;font-weight:750;font-size:clamp(28px,4.4vw,40px);line-height:1.05;margin:0;text-wrap:balance}
+.lede{color:var(--muted);max-width:68ch;margin:0}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,260px));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:2px;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.stat:hover{border-color:var(--accent)}
+.stat[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:-1px}
+.stat .n{font-family:var(--display);font-weight:700;font-size:28px;font-variant-numeric:tabular-nums}
+.stat .l{font-size:13px;color:var(--muted)}
+.stat .bar{height:4px;border-radius:2px;margin-top:6px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.controls input{flex:1 1 240px;min-width:0;font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.controls select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:1760px}
+.who .pill{justify-self:center;margin-bottom:2px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);position:sticky;top:0;background:var(--surface)}
+th button{all:unset;cursor:pointer}
+th button:focus-visible,a:focus-visible,.stat:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+tr:last-child td{border-bottom:0}
+td.co a{font-weight:600;color:var(--fg);text-decoration:none}
+td.co a:hover{text-decoration:underline;color:var(--accent)}
+td.biz{color:var(--muted);font-size:14px;min-width:48ch;max-width:48ch}
+td.num{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.yes{color:var(--yes);background:var(--yes-bg)}
+.pill.hom{color:var(--hom);background:var(--hom-bg)}
+.pill.no{color:var(--no);background:var(--no-bg)}
+.pill.unk{color:var(--unk);background:var(--unk-bg)}
+.fit{font-size:12.5px;font-weight:600;white-space:nowrap}
+.fit.high{color:var(--accent)}
+td.cat{font-size:13.5px}
+.via{color:var(--muted);font-size:11px;letter-spacing:.03em}
+th:nth-child(n+4):nth-child(-n+8),td:nth-child(n+4):nth-child(-n+8),th:nth-child(10),td:nth-child(10){text-align:center}
+td:nth-child(7) .who,td:nth-child(8) .who{justify-items:center;text-align:center}
+th:nth-child(3),td:nth-child(3){width:150px;min-width:150px;max-width:150px}
+th:nth-child(4),td:nth-child(4){width:166px;min-width:166px;max-width:166px}
+th:nth-child(5),td:nth-child(5){width:139px;min-width:139px;max-width:139px}
+th:nth-child(6),td:nth-child(6){width:149px;min-width:149px;max-width:149px}
+th:nth-child(7),td:nth-child(7){width:143px;min-width:143px;max-width:143px}
+th:nth-child(8),td:nth-child(8){width:142px;min-width:142px;max-width:142px}
+td.hq{font-size:13.5px;color:var(--muted)}
+.fit.low{color:var(--muted);font-weight:400}
+.pill.nc{color:var(--muted);background:transparent;border:1px dashed var(--line)}
+.who{display:grid;gap:3px;font-size:14px;justify-items:start}
+.who a{color:var(--accent);text-decoration:none}
+.who a:hover{text-decoration:underline}
+.who small{color:var(--muted);font-size:12px}
+.deal a{color:var(--muted);font-size:13px}
+.note{font-size:13px;color:var(--muted)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow">Funding Search VC/PE · all funding deals</div>
+    <h1>Who needs GTM leaders?</h1>
+    <p class="lede">Every company that announced funding since July 1, high and low fit, refreshed daily, with whether it has a CMO or VP of Marketing and a CRO or VP of Sales. Companies with no marketing leader sort first.</p>
+  </header>
+
+  <section class="summary" id="summary" aria-label="Filter by marketing leader status"></section>
+
+  <div class="controls">
+    <select id="stage" aria-label="Stage">
+      <option value="">All stages</option>
+    </select>
+    <select id="cat" aria-label="Category">
+      <option value="">All categories</option>
+    </select>
+    <select id="mkt" aria-label="Marketing leader">
+      <option value="">Marketing leader: any</option>
+      <option value="yes">Marketing leader: Yes</option>
+      <option value="no">Marketing leader: No</option>
+      <option value="nc">Marketing leader: Needs lookup</option>
+    </select>
+    <select id="sales" aria-label="Sales leader">
+      <option value="">Sales leader: any</option>
+      <option value="yes">Sales leader: Yes</option>
+      <option value="no">Sales leader: No</option>
+      <option value="nc">Sales leader: Needs lookup</option>
+    </select>
+    <select id="fit" aria-label="Fit">
+      <option value="">Fit: High and Low</option>
+      <option value="high">Fit: High</option>
+      <option value="low">Fit: Low</option>
+    </select>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="tablebox">
+    <table>
+      <thead><tr>
+        <th><button data-k="c">Company</button></th>
+        <th>Business</th>
+        <th><button data-k="hq">Headquarters</button></th>
+        <th><button data-k="s">Stage</button></th>
+        <th><button data-k="a">Amount</button></th>
+        <th><button data-k="cat">Category</button></th>
+        <th><button data-k="st">Marketing leader (VP or CMO)</button></th>
+        <th><button data-k="sst">Sales leader (CRO or VP Sales)</button></th>
+        <th><button data-k="src">Source</button></th>
+        <th><button data-k="fit">Fit</button></th>
+        <th><button data-k="iso">Deal date</button></th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p class="note">Sources: LinkedIn_Announcements and Fundedcontacts tabs of Funding Search: VC/PE V2, and public company and people data. Marketing leader is Yes for a CMO or a VP or SVP of Marketing; a Head of Marketing alone counts as No. Sales leader is Yes for a CRO, a VP or SVP of Sales or Revenue, a Chief Commercial Officer or similar; a Head of Sales alone counts as No. Clay data can lag recent hires, so a Clay "No" is a first pass, not a confirmed gap. "Needs lookup" means the company has not been looked up yet or could not be matched to a company record. Headquarters comes from the funding announcements and shows "—" where the source did not say.</p>
+</div>
+
+<script>
+let DATA = [];
+const LABEL = {yes:"Yes", no:"No", nc:"Needs lookup"};
+const ORDER = {no:0, yes:1, nc:2};
+const SLABEL = {yes:"Yes", no:"No", nc:"Needs lookup"};
+const SCLS = {yes:"yes", no:"no", nc:"nc"};
+const SORDER = {no:0, yes:1, nc:2};
+const COLOR = {yes:"var(--yes)", hom:"var(--hom)", no:"var(--no)", unk:"var(--unk)", nc:"var(--line)"};
+let preset = "";
+const DAY = 864e5, NOW = Date.now();
+const age = d => d.iso ? Math.floor((NOW - Date.parse(d.iso.slice(0,10)))/DAY) : -1;
+const PRESETS = {
+  fresh: d => d.fit==="high" && d.st==="no" && age(d)>=30 && age(d)<=90,
+  crono: d => d.sst==="yes" && d.st==="no"
+};
+let filter = "", sortKey = "st", sortDir = 1;
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money = a => { const m = String(a).match(/([\d.,]+)\s*(M|B|K)?/i); if(!m) return -1; let v = parseFloat(m[1].replace(/,/g,"")); const u=(m[2]||"").toUpperCase(); if(u==="B") v*=1000; if(u==="K") v/=1000; if(/KRW/.test(a)) v=v/1350*1000; return v; };
+
+function summary(){
+  const el = document.getElementById("summary");
+  const nm = DATA.filter(d=>d.st==="no").length, ns = DATA.filter(d=>d.sst==="no").length;
+  const salesSel = document.getElementById("sales");
+  const items = [["mk","No marketing leader",nm,COLOR.no, filter==="no"],["sl","No sales leader",ns,COLOR.no, salesSel.value==="no"],["fresh","High fit, no marketing leader, funded 30–90 days ago",DATA.filter(PRESETS.fresh).length,"var(--accent)", preset==="fresh"],["crono","Has CRO, no CMO",DATA.filter(PRESETS.crono).length,"var(--accent)", preset==="crono"]];
+  el.innerHTML = items.map(([k,l,n,c,on]) => `<button class="stat" type="button" data-f="${k}" aria-pressed="${on}"><span class="n">${n}</span><span class="l">${esc(l)}</span><span class="bar" style="background:${c};width:${Math.max(6, n/DATA.length*100)}%"></span></button>`).join("");
+  el.querySelectorAll(".stat").forEach(b => b.onclick = () => {
+    if (b.dataset.f==="mk") { filter = filter==="no" ? "" : "no"; document.getElementById("mkt").value = filter; }
+    else if (b.dataset.f==="sl") { salesSel.value = salesSel.value==="no" ? "" : "no"; }
+    else { preset = preset===b.dataset.f ? "" : b.dataset.f; }
+    render(); });
+}
+
+function people(list){
+  return list.map(p => `<span><a href="${esc(p.u)}" target="_blank" rel="noopener">${esc(p.n)}</a> <small>${esc(p.t)}</small></span>`).join("");
+}
+
+function render(){
+  summary();
+  const q = "";
+  const stage = document.getElementById("stage").value;
+  const sales = document.getElementById("sales").value;
+  const fitv = document.getElementById("fit").value;
+  const catv = document.getElementById("cat").value;
+  let list = DATA.filter(d => (!preset || PRESETS[preset](d)) && (!filter || d.st===filter) && (!stage || d.s===stage) && (!sales || d.sst===sales) && (!fitv || d.fit===fitv) && (!catv || d.cat===catv) &&
+    (!q || [d.c,d.b,d.cat,...d.ml.map(p=>p.n),...d.sl.map(p=>p.n), d.lead?.n].join(" ").toLowerCase().includes(q)));
+  list.sort((x,y) => {
+    let a, b;
+    if (sortKey==="st"){ a=ORDER[x.st]; b=ORDER[y.st]; if(a===b){ return (y.iso||"").localeCompare(x.iso||""); } }
+    else if (sortKey==="sst"){ a=SORDER[x.sst]; b=SORDER[y.sst]; if(a===b){ a=ORDER[x.st]; b=ORDER[y.st]; } }
+    else if (sortKey==="a"){ a=money(x.a); b=money(y.a); }
+    else { a=(x[sortKey]||"").toLowerCase(); b=(y[sortKey]||"").toLowerCase(); if(a===b){ a=ORDER[x.st]; b=ORDER[y.st]; } }
+    return (a<b?-1:a>b?1:0)*sortDir;
+  });
+  document.getElementById("count").textContent = `${list.length} of ${DATA.length} accounts`;
+  document.getElementById("rows").innerHTML = list.length ? list.map(d => `<tr>
+    <td class="co">${d.u ? `<a href="${esc(d.u)}" target="_blank" rel="noopener">${esc(d.c)}</a>` : esc(d.c)}</td>
+    <td class="biz">${esc(d.b)}</td>
+    <td class="hq">${d.hq ? esc(d.hq) : "—"}</td>
+    <td>${esc(d.s)}</td>
+    <td class="num">${esc(d.a)}</td>
+    <td class="cat">${esc(d.cat)}</td>
+    <td><div class="who"><span class="pill ${d.st}">${LABEL[d.st]}</span>${people(d.ml)}</div></td>
+    <td><div class="who"><span class="pill ${SCLS[d.sst]}">${SLABEL[d.sst]}</span>${people(d.sl)}</div></td>
+    <td class="deal">${d.dl ? `<a href="${esc(d.dl)}" target="_blank" rel="noopener">${esc(d.src||"Link")}</a>` : esc(d.src)}</td>
+    <td><span class="fit ${d.fit}">${d.fit==="high"?"High":"Low"}</span></td>
+    <td class="num">${esc(d.d)}</td>
+  </tr>`).join("") : `<tr><td colspan="11" class="empty">No accounts match these filters.</td></tr>`;
+}
+
+const fmtDay = iso => new Date(iso.slice(0,10)+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+function start(){
+const stages = [...new Set(DATA.map(d=>d.s).filter(Boolean))].sort();
+  document.getElementById("stage").insertAdjacentHTML("beforeend", stages.map(s=>`<option>${esc(s)}</option>`).join(""));
+  document.getElementById("stage").addEventListener("change", render);
+  document.getElementById("sales").addEventListener("change", render);
+  document.getElementById("mkt").addEventListener("change", e => { filter = e.target.value; render(); });
+  document.getElementById("fit").addEventListener("change", render);
+  document.getElementById("cat").addEventListener("change", render);
+  const cats=[...new Set(DATA.map(d=>d.cat))].sort((a,b)=>a==="Other"?1:b==="Other"?-1:a.localeCompare(b));
+  document.getElementById("cat").insertAdjacentHTML("beforeend", cats.map(c=>`<option>${esc(c)}</option>`).join(""));
+  document.querySelectorAll("th button").forEach(b => b.onclick = () => { const k=b.dataset.k; sortDir = (sortKey===k) ? -sortDir : (k==="iso"||k==="a" ? -1 : 1); sortKey=k; render(); });
+  render();
+}
+document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">Loading accounts…</td></tr>`;
+fetch("data.json", {cache:"no-store"}).then(r => { if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }).then(j => {
+  DATA = Array.isArray(j) ? j : (j.rows || []);
+  const isos = DATA.map(d=>d.iso).filter(Boolean).sort();
+  const eb = document.getElementById("eyebrow");
+  if (isos.length) eb.textContent = `Funding Search VC/PE · all funding deals · ${fmtDay(isos[0])} to ${fmtDay(isos[isos.length-1])}` + (j.updated ? ` · updated ${fmtDay(j.updated)}` : "");
+  start();
+}).catch(e => {
+  document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">The account list could not load (${esc(e.message)}). Reload the page to try again.</td></tr>`;
+});
+</script>
+</body></html>
