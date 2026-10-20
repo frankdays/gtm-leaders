@@ -84,6 +84,21 @@ td.hq{font-size:13.5px;color:var(--muted)}
 .deal a{color:var(--muted);font-size:13px}
 .note{font-size:13px;color:var(--muted)}
 .empty{padding:28px;text-align:center;color:var(--muted)}
+.ms{position:relative}
+.ms summary{list-style:none;cursor:pointer;font:inherit;padding:9px 30px 9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);white-space:nowrap;position:relative;user-select:none}
+.ms summary::-webkit-details-marker{display:none}
+.ms summary::after{content:"";position:absolute;right:11px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:translateY(-70%) rotate(45deg)}
+.ms[open] summary{border-color:var(--accent)}
+.ms summary.on{color:var(--accent);font-weight:600;background:var(--accent-soft)}
+.ms summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ms-menu{position:absolute;z-index:20;top:calc(100% + 6px);left:0;width:min(320px,calc(100vw - 32px));max-height:360px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);padding:6px}
+.ms-head{display:flex;justify-content:space-between;align-items:center;padding:6px 8px 8px;border-bottom:1px solid var(--line);margin-bottom:4px;font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.ms-head button{font:inherit;text-transform:none;letter-spacing:0;font-family:var(--body);font-size:13px;color:var(--accent);background:none;border:0;cursor:pointer;padding:2px 4px}
+.ms-head button:focus-visible{outline:2px solid var(--accent);border-radius:4px}
+.ms-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:14px}
+.ms-opt:hover{background:var(--accent-soft)}
+.ms-opt input{accent-color:var(--accent);margin:0}
+.ms-opt .k{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 </style>
 
 <div class="wrap">
@@ -99,9 +114,13 @@ td.hq{font-size:13.5px;color:var(--muted)}
     <select id="stage" aria-label="Stage">
       <option value="">All stages</option>
     </select>
-    <select id="cat" aria-label="Category">
-      <option value="">All categories</option>
-    </select>
+    <details class="ms" id="catbox">
+      <summary id="catsum" aria-label="Categories">All categories</summary>
+      <div class="ms-menu" role="group" aria-label="Categories">
+        <div class="ms-head"><span>Categories</span><button type="button" id="catclear">Clear</button></div>
+        <div id="catlist"></div>
+      </div>
+    </details>
     <select id="mkt" aria-label="Marketing leader">
       <option value="">Marketing leader: any</option>
       <option value="yes">Marketing leader: Yes</option>
@@ -152,6 +171,7 @@ const SCLS = {yes:"yes", no:"no", nc:"nc"};
 const SORDER = {no:0, yes:1, nc:2};
 const COLOR = {yes:"var(--yes)", hom:"var(--hom)", no:"var(--no)", unk:"var(--unk)", nc:"var(--line)"};
 let preset = "";
+const CATS = new Set();
 const DAY = 864e5, NOW = Date.now();
 const age = d => d.iso ? Math.floor((NOW - Date.parse(d.iso.slice(0,10)))/DAY) : -1;
 const PRESETS = {
@@ -185,8 +205,7 @@ function render(){
   const stage = document.getElementById("stage").value;
   const sales = document.getElementById("sales").value;
   const fitv = document.getElementById("fit").value;
-  const catv = document.getElementById("cat").value;
-  let list = DATA.filter(d => (!preset || PRESETS[preset](d)) && (!filter || d.st===filter) && (!stage || d.s===stage) && (!sales || d.sst===sales) && (!fitv || d.fit===fitv) && (!catv || d.cat===catv) &&
+  let list = DATA.filter(d => (!preset || PRESETS[preset](d)) && (!filter || d.st===filter) && (!stage || d.s===stage) && (!sales || d.sst===sales) && (!fitv || d.fit===fitv) && (!CATS.size || CATS.has(d.cat)) &&
     (!q || [d.c,d.b,d.cat].join(" ").toLowerCase().includes(q)));
   list.sort((x,y) => {
     let a, b;
@@ -220,9 +239,19 @@ const stages = [...new Set(DATA.map(d=>d.s).filter(Boolean))].sort();
   document.getElementById("sales").addEventListener("change", render);
   document.getElementById("mkt").addEventListener("change", e => { filter = e.target.value; render(); });
   document.getElementById("fit").addEventListener("change", render);
-  document.getElementById("cat").addEventListener("change", render);
-  const cats=[...new Set(DATA.map(d=>d.cat))].sort((a,b)=>a==="Other"?1:b==="Other"?-1:a.localeCompare(b));
-  document.getElementById("cat").insertAdjacentHTML("beforeend", cats.map(c=>`<option>${esc(c)}</option>`).join(""));
+  const cats=[...new Set(DATA.map(d=>d.cat).filter(Boolean))].sort((a,b)=>a==="Other"?1:b==="Other"?-1:a.localeCompare(b));
+  const ncat = c => DATA.filter(d=>d.cat===c).length;
+  const list = document.getElementById("catlist"), sum = document.getElementById("catsum"), box = document.getElementById("catbox");
+  list.innerHTML = cats.map((c,i)=>`<label class="ms-opt" for="cat-${i}"><input type="checkbox" id="cat-${i}" value="${esc(c)}"><span>${esc(c)}</span><span class="k">${ncat(c)}</span></label>`).join("");
+  const syncSum = () => {
+    const n = CATS.size;
+    sum.textContent = n===0 ? "All categories" : n===1 ? [...CATS][0] : `${n} categories`;
+    sum.classList.toggle("on", n>0);
+  };
+  list.addEventListener("change", e => { const t=e.target; if(t.type!=="checkbox") return; t.checked ? CATS.add(t.value) : CATS.delete(t.value); syncSum(); render(); });
+  document.getElementById("catclear").addEventListener("click", () => { CATS.clear(); list.querySelectorAll("input").forEach(i=>i.checked=false); syncSum(); render(); });
+  document.addEventListener("click", e => { if (box.open && !box.contains(e.target)) box.open = false; });
+  document.addEventListener("keydown", e => { if (e.key==="Escape" && box.open) { box.open=false; sum.focus(); } });
   document.querySelectorAll("th button").forEach(b => b.onclick = () => { const k=b.dataset.k; sortDir = (sortKey===k) ? -sortDir : (k==="iso"||k==="a" ? -1 : 1); sortKey=k; render(); });
   render();
 }
