@@ -105,7 +105,7 @@ td.hq{font-size:13.5px;color:var(--muted)}
   <header>
     <div class="eyebrow" id="eyebrow">Funding Search VC/PE · all funding deals</div>
     <h1>GTM Openings Before They're Posted</h1>
-    <p class="lede">Every company that announced funding since July 1, high and low fit, refreshed daily, with whether it has a CMO or VP of Marketing and a CRO or VP of Sales. Companies with no marketing leader sort first.</p>
+    <p class="lede">Every company that announced funding since July 1, refreshed daily, with whether it has a CMO or VP of Marketing and a CRO or VP of Sales. Companies with no marketing leader sort first.</p>
   </header>
 
   <section class="summary" id="summary" aria-label="Filter by marketing leader status"></section>
@@ -186,7 +186,7 @@ function summary(){
   const el = document.getElementById("summary");
   const nm = DATA.filter(d=>d.st==="no").length, ns = DATA.filter(d=>d.sst==="no").length;
   const salesSel = document.getElementById("sales");
-  const items = [["mk","No marketing leader",nm,COLOR.no, filter==="no"],["sl","No sales leader",ns,COLOR.no, salesSel.value==="no"],["fresh","High fit, no marketing leader, funded 30–90 days ago",DATA.filter(PRESETS.fresh).length,"var(--accent)", preset==="fresh"],["crono","Has CRO, no CMO",DATA.filter(PRESETS.crono).length,"var(--accent)", preset==="crono"]];
+  const items = [["mk","No marketing leader",nm,COLOR.no, filter==="no"],["sl","No sales leader",ns,COLOR.no, salesSel.value==="no"],["crono","Has CRO, no CMO",DATA.filter(PRESETS.crono).length,"var(--accent)", preset==="crono"]];
   el.innerHTML = items.map(([k,l,n,c,on]) => `<button class="stat" type="button" data-f="${k}" aria-pressed="${on}"><span class="n">${n}</span><span class="l">${esc(l)}</span><span class="bar" style="background:${c};width:${Math.max(6, n/DATA.length*100)}%"></span></button>`).join("");
   el.querySelectorAll(".stat").forEach(b => b.onclick = () => {
     if (b.dataset.f==="mk") { filter = filter==="no" ? "" : "no"; document.getElementById("mkt").value = filter; }
