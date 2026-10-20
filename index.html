@@ -187,7 +187,7 @@ function render(){
   const fitv = document.getElementById("fit").value;
   const catv = document.getElementById("cat").value;
   let list = DATA.filter(d => (!preset || PRESETS[preset](d)) && (!filter || d.st===filter) && (!stage || d.s===stage) && (!sales || d.sst===sales) && (!fitv || d.fit===fitv) && (!catv || d.cat===catv) &&
-    (!q || [d.c,d.b,d.cat,...d.ml.map(p=>p.n),...d.sl.map(p=>p.n), d.lead?.n].join(" ").toLowerCase().includes(q)));
+    (!q || [d.c,d.b,d.cat].join(" ").toLowerCase().includes(q)));
   list.sort((x,y) => {
     let a, b;
     if (sortKey==="st"){ a=ORDER[x.st]; b=ORDER[y.st]; if(a===b){ return (y.iso||"").localeCompare(x.iso||""); } }
@@ -204,8 +204,8 @@ function render(){
     <td>${esc(d.s)}</td>
     <td class="num">${esc(d.a)}</td>
     <td class="cat">${esc(d.cat)}</td>
-    <td><div class="who"><span class="pill ${d.st}">${LABEL[d.st]}</span>${people(d.ml)}</div></td>
-    <td><div class="who"><span class="pill ${SCLS[d.sst]}">${SLABEL[d.sst]}</span>${people(d.sl)}</div></td>
+    <td><div class="who"><span class="pill ${d.st}">${LABEL[d.st]}</span></div></td>
+    <td><div class="who"><span class="pill ${SCLS[d.sst]}">${SLABEL[d.sst]}</span></div></td>
     <td class="deal">${d.dl ? `<a href="${esc(d.dl)}" target="_blank" rel="noopener">${esc(d.src||"Link")}</a>` : esc(d.src)}</td>
     <td><span class="fit ${d.fit}">${d.fit==="high"?"High":"Low"}</span></td>
     <td class="num">${esc(d.d)}</td>
