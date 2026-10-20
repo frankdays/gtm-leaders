@@ -35,7 +35,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14.5
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
 .wrap{max-width:1180px;margin:0 auto;display:grid;gap:22px}
 header{display:grid;gap:10px;padding-block:8px 4px}
-.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:0;color:var(--muted)}
 h1{font-family:var(--display);font-weight:600;font-size:clamp(32px,5.4vw,54px);line-height:1;letter-spacing:-.045em;margin:0;text-wrap:balance}
 .lede{color:var(--muted);max-width:62ch;margin:0;font-size:16px}
 .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,260px));gap:10px}
@@ -116,7 +116,7 @@ td.hq{font-size:13.5px;color:var(--muted)}
 
   <section class="summary" id="summary" aria-label="Filter by marketing leader status"></section>
 
-  <div class="eyebrow" id="eyebrow">Funding Search · all funding deals</div>
+  <div class="eyebrow" id="eyebrow">Funding Search · All Funding Deals</div>
 
   <div class="controls">
     <select id="stage" aria-label="Stage">
@@ -268,7 +268,7 @@ fetch("data.json", {cache:"no-store"}).then(r => { if(!r.ok) throw new Error("HT
   DATA = Array.isArray(j) ? j : (j.rows || []);
   const isos = DATA.map(d=>d.iso).filter(Boolean).sort();
   const eb = document.getElementById("eyebrow");
-  if (isos.length) eb.textContent = `Funding Search · all funding deals · ${fmtDay(isos[0])} to ${fmtDay(isos[isos.length-1])}`;
+  if (isos.length) eb.textContent = `Funding Search · All Funding Deals · ${fmtDay(isos[0])} to ${fmtDay(isos[isos.length-1])}`;
   start();
 }).catch(e => {
   document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">The account list could not load (${esc(e.message)}). Reload the page to try again.</td></tr>`;
