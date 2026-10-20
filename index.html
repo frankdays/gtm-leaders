@@ -110,7 +110,7 @@ td.hq{font-size:13.5px;color:var(--muted)}
 
 <div class="wrap">
   <header>
-    <div class="eyebrow" id="eyebrow">Funding Search VC/PE · all funding deals</div>
+    <div class="eyebrow" id="eyebrow">Funding Search · all funding deals</div>
     <h1>GTM Openings Before They're Posted</h1>
     <p class="lede">Every company that announced funding since July 1, refreshed daily, with whether it has a CMO or VP of Marketing and a CRO or VP of Sales.</p>
   </header>
@@ -267,7 +267,7 @@ fetch("data.json", {cache:"no-store"}).then(r => { if(!r.ok) throw new Error("HT
   DATA = Array.isArray(j) ? j : (j.rows || []);
   const isos = DATA.map(d=>d.iso).filter(Boolean).sort();
   const eb = document.getElementById("eyebrow");
-  if (isos.length) eb.textContent = `Funding Search VC/PE · all funding deals · ${fmtDay(isos[0])} to ${fmtDay(isos[isos.length-1])}` + (j.updated ? ` · updated ${fmtDay(j.updated)}` : "");
+  if (isos.length) eb.textContent = `Funding Search · all funding deals · ${fmtDay(isos[0])} to ${fmtDay(isos[isos.length-1])}`;
   start();
 }).catch(e => {
   document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">The account list could not load (${esc(e.message)}). Reload the page to try again.</td></tr>`;
