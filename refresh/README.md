@@ -42,6 +42,14 @@ refresh runs after noon ET.
    "Funding Deals YYYY-MM-DD" sheet. If it exists and has rows dated today, but fs.xlsx's
    LinkedIn_Announcements tab has no rows dated today, download the spreadsheet again (up to 2 more
    tries) before going on, and say in the report if it was still stale.
+3b. **Bridge a stale sync.** If, after those tries, any "Funding Deals YYYY-MM-DD" sheet modified since the
+   newest date in the LinkedIn_Announcements tab (check the last 3 days, not only today) has rows that the tab
+   lacks, download each such sheet with `download_file_content` (same exportMimeType, base64-decode into
+   `latest_<date>.xlsx` in the working folder) and run
+   `python3 append_latest.py fs.xlsx latest_<date>.xlsx ...` (copy it to the working folder in step 1; use a
+   Python that has openpyxl). It appends the missing rows to the LOCAL fs.xlsx only, skips rows already in the
+   tab, and never touches Drive. Then go on to step 4. Say in the report that the sync was bridged and how many
+   rows were appended. Rows added this way get no Fundedcontacts data, so they take the Clay lookup in step 6.
 4. **New companies.** `python3 gtm_prep.py fs.xlsx <data.json path> work.json`. It prints each company
    not yet on the page and whether it needs a Clay lookup. If it finds none, stop: publish nothing and
    report "No new funded companies today."
