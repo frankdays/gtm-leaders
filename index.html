@@ -120,7 +120,7 @@ td.hq{font-size:13.5px;color:var(--muted)}
 
   <div class="eyebrow" id="eyebrow">Funding Search</div>
 
-  <p class="byline">Created by <a href="https://www.linkedin.com/in/frank-days/" target="_blank" rel="noopener">Frank Days</a></p>
+  <p class="byline">Created by <a href="https://www.linkedin.com/in/frank-days/" target="_blank" rel="noopener" onclick="track('byline-click')">Frank Days</a></p>
 
   <div class="controls">
     <details class="ms" id="stagebox">
@@ -187,6 +187,7 @@ const SCLS = {yes:"yes", no:"no", nc:"nc"};
 const SORDER = {no:0, yes:1, nc:2};
 const COLOR = {yes:"var(--yes)", hom:"var(--hom)", no:"var(--no)", unk:"var(--unk)", nc:"var(--line)"};
 let preset = "";
+const track = name => { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({path:"event/"+name, title:name, event:true}); } catch(e){} };
 const CATS = new Set();
 const STAGES = new Set();
 const stageKey = s => { s = String(s||"").trim(); let m;
@@ -212,7 +213,7 @@ function summary(){
   const salesSel = document.getElementById("sales");
   const items = [["mk","No marketing leader (CMO, SVP, VP)",nm,"var(--fg)", filter==="no"],["sl","No sales leader (CRO, SVP, VP)",ns,"var(--fg)", salesSel.value==="no"],["both","No marketing or sales leader",DATA.filter(PRESETS.both).length,"var(--fg)", preset==="both"]];
   el.innerHTML = items.map(([k,l,n,c,on]) => `<button class="stat" type="button" data-f="${k}" aria-pressed="${on}"><span class="n">${n}</span><span class="l">${esc(l)}</span><span class="bar" style="background:${c};width:${Math.max(6, n/DATA.length*100)}%"></span></button>`).join("");
-  el.querySelectorAll(".stat").forEach(b => b.onclick = () => {
+  el.querySelectorAll(".stat").forEach(b => b.onclick = () => { track("tile-"+b.dataset.f);
     if (b.dataset.f==="mk") { filter = filter==="no" ? "" : "no"; document.getElementById("mkt").value = filter; }
     else if (b.dataset.f==="sl") { salesSel.value = salesSel.value==="no" ? "" : "no"; }
     else { preset = preset===b.dataset.f ? "" : b.dataset.f; }
@@ -261,13 +262,13 @@ const skeys = ["Pre-seed","Seed","Series A","Series B","Series C","Series D","Se
   const slist = document.getElementById("stagelist"), ssum = document.getElementById("stagesum"), sbox = document.getElementById("stagebox");
   slist.innerHTML = skeys.map((c,i)=>`<label class="ms-opt" for="stg-${i}"><input type="checkbox" id="stg-${i}" value="${esc(c)}"><span>${esc(c)}</span><span class="k">${nstage(c)}</span></label>`).join("");
   const syncStage = () => { const n = STAGES.size; ssum.textContent = n===0 ? "All stages" : n===1 ? [...STAGES][0] : `${n} stages`; ssum.classList.toggle("on", n>0); };
-  slist.addEventListener("change", e => { const t=e.target; if(t.type!=="checkbox") return; t.checked ? STAGES.add(t.value) : STAGES.delete(t.value); syncStage(); render(); });
+  slist.addEventListener("change", e => { const t=e.target; if(t.type!=="checkbox") return; t.checked ? STAGES.add(t.value) : STAGES.delete(t.value); if (t.checked) track("stage-"+t.value); syncStage(); render(); });
   document.getElementById("stageclear").addEventListener("click", () => { STAGES.clear(); slist.querySelectorAll("input").forEach(i=>i.checked=false); syncStage(); render(); });
   document.addEventListener("click", e => { if (sbox.open && !sbox.contains(e.target)) sbox.open = false; });
   document.addEventListener("keydown", e => { if (e.key==="Escape" && sbox.open) { sbox.open=false; ssum.focus(); } });
-  document.getElementById("sales").addEventListener("change", render);
-  document.getElementById("mkt").addEventListener("change", e => { filter = e.target.value; render(); });
-  document.getElementById("fit").addEventListener("change", render);
+  document.getElementById("sales").addEventListener("change", e => { track("sales-"+(e.target.value||"any")); render(); });
+  document.getElementById("mkt").addEventListener("change", e => { filter = e.target.value; track("marketing-"+(filter||"any")); render(); });
+  document.getElementById("fit").addEventListener("change", e => { track("fit-"+(e.target.value||"any")); render(); });
   const cats=[...new Set(DATA.map(d=>d.cat).filter(Boolean))].sort((a,b)=>a==="Other"?1:b==="Other"?-1:a.localeCompare(b));
   const ncat = c => DATA.filter(d=>d.cat===c).length;
   const list = document.getElementById("catlist"), sum = document.getElementById("catsum"), box = document.getElementById("catbox");
@@ -277,11 +278,11 @@ const skeys = ["Pre-seed","Seed","Series A","Series B","Series C","Series D","Se
     sum.textContent = n===0 ? "All categories" : n===1 ? [...CATS][0] : `${n} categories`;
     sum.classList.toggle("on", n>0);
   };
-  list.addEventListener("change", e => { const t=e.target; if(t.type!=="checkbox") return; t.checked ? CATS.add(t.value) : CATS.delete(t.value); syncSum(); render(); });
+  list.addEventListener("change", e => { const t=e.target; if(t.type!=="checkbox") return; t.checked ? CATS.add(t.value) : CATS.delete(t.value); if (t.checked) track("category-"+t.value); syncSum(); render(); });
   document.getElementById("catclear").addEventListener("click", () => { CATS.clear(); list.querySelectorAll("input").forEach(i=>i.checked=false); syncSum(); render(); });
   document.addEventListener("click", e => { if (box.open && !box.contains(e.target)) box.open = false; });
   document.addEventListener("keydown", e => { if (e.key==="Escape" && box.open) { box.open=false; sum.focus(); } });
-  document.querySelectorAll("th button").forEach(b => b.onclick = () => { const k=b.dataset.k; sortDir = (sortKey===k) ? -sortDir : (k==="iso"||k==="a" ? -1 : 1); sortKey=k; render(); });
+  document.querySelectorAll("th button").forEach(b => b.onclick = () => { const k=b.dataset.k; track("sort-"+k); sortDir = (sortKey===k) ? -sortDir : (k==="iso"||k==="a" ? -1 : 1); sortKey=k; render(); });
   render();
 }
 document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">Loading accounts…</td></tr>`;
