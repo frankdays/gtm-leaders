@@ -184,7 +184,8 @@ const DAY = 864e5, NOW = Date.now();
 const age = d => d.iso ? Math.floor((NOW - Date.parse(d.iso.slice(0,10)))/DAY) : -1;
 const PRESETS = {
   fresh: d => d.fit==="high" && d.st==="no" && age(d)>=30 && age(d)<=90,
-  crono: d => d.sst==="yes" && d.st==="no"
+  crono: d => d.sst==="yes" && d.st==="no",
+  both: d => d.st==="no" && d.sst==="no"
 };
 let filter = "", sortKey = "st", sortDir = 1;
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -194,7 +195,7 @@ function summary(){
   const el = document.getElementById("summary");
   const nm = DATA.filter(d=>d.st==="no").length, ns = DATA.filter(d=>d.sst==="no").length;
   const salesSel = document.getElementById("sales");
-  const items = [["mk","No marketing leader",nm,"var(--fg)", filter==="no"],["sl","No sales leader",ns,"var(--fg)", salesSel.value==="no"],["crono","Has CRO, no CMO",DATA.filter(PRESETS.crono).length,"var(--fg)", preset==="crono"]];
+  const items = [["mk","No marketing leader",nm,"var(--fg)", filter==="no"],["sl","No sales leader",ns,"var(--fg)", salesSel.value==="no"],["crono","Has CRO, no CMO",DATA.filter(PRESETS.crono).length,"var(--fg)", preset==="crono"],["both","No marketing or sales leader",DATA.filter(PRESETS.both).length,"var(--fg)", preset==="both"]];
   el.innerHTML = items.map(([k,l,n,c,on]) => `<button class="stat" type="button" data-f="${k}" aria-pressed="${on}"><span class="n">${n}</span><span class="l">${esc(l)}</span><span class="bar" style="background:${c};width:${Math.max(6, n/DATA.length*100)}%"></span></button>`).join("");
   el.querySelectorAll(".stat").forEach(b => b.onclick = () => {
     if (b.dataset.f==="mk") { filter = filter==="no" ? "" : "no"; document.getElementById("mkt").value = filter; }
