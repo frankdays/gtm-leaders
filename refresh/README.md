@@ -91,7 +91,7 @@ refresh runs after noon ET.
    python3 <working folder>/make_public.py <data_out.json path> <index.html path from step 2> .
    ```
    Before committing, confirm no person data is in the copy: every row has empty `ml` and `sl` and
-   `lead` null, and `grep -c "linkedin.com/in/" data.json index.html` is 0 for both. If not, do not push.
+   `lead` null, and `grep -c "linkedin.com/in/" data.json index.html` is 0 for data.json and at most 1 for index.html (the "Created by Frank Days" byline link, `linkedin.com/in/frank-days/`, is the only allowed one). If not, do not push.
    Then `git add index.html data.json .nojekyll` (never `git add -A`), commit as "Frank Days <frank.days@gmail.com>" with message
    "Refresh: <N> rows (<added> added <YYYY-MM-DD>)", and `git push origin main`. Never force-push and
    never push anything other than index.html, data.json and .nojekyll. If the push is refused, do not
