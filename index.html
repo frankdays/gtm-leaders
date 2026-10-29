@@ -119,9 +119,13 @@ td.hq{font-size:13.5px;color:var(--muted)}
   <div class="eyebrow" id="eyebrow">Funding Search</div>
 
   <div class="controls">
-    <select id="stage" aria-label="Stage">
-      <option value="">All stages</option>
-    </select>
+    <details class="ms" id="stagebox">
+      <summary id="stagesum" aria-label="Stages">All stages</summary>
+      <div class="ms-menu" role="group" aria-label="Stages">
+        <div class="ms-head"><span>Stages</span><button type="button" id="stageclear">Clear</button></div>
+        <div id="stagelist"></div>
+      </div>
+    </details>
     <details class="ms" id="catbox">
       <summary id="catsum" aria-label="Categories">All categories</summary>
       <div class="ms-menu" role="group" aria-label="Categories">
@@ -180,6 +184,14 @@ const SORDER = {no:0, yes:1, nc:2};
 const COLOR = {yes:"var(--yes)", hom:"var(--hom)", no:"var(--no)", unk:"var(--unk)", nc:"var(--line)"};
 let preset = "";
 const CATS = new Set();
+const STAGES = new Set();
+const stageKey = s => { s = String(s||"").trim(); let m;
+  if (/^pre-seed/i.test(s)) return "Pre-seed";
+  if (/^seed/i.test(s)) return "Seed";
+  if (/^pre-series/i.test(s)) return "Pre-Series";
+  if ((m = s.match(/^series ([a-z])/i))) return "Series " + m[1].toUpperCase();
+  if (/^growth/i.test(s)) return "Growth";
+  return "Other"; };
 const DAY = 864e5, NOW = Date.now();
 const age = d => d.iso ? Math.floor((NOW - Date.parse(d.iso.slice(0,10)))/DAY) : -1;
 const PRESETS = {
@@ -210,10 +222,9 @@ function people(list){
 function render(){
   summary();
   const q = "";
-  const stage = document.getElementById("stage").value;
   const sales = document.getElementById("sales").value;
   const fitv = document.getElementById("fit").value;
-  let list = DATA.filter(d => (!preset || PRESETS[preset](d)) && (!filter || d.st===filter) && (!stage || d.s===stage) && (!sales || d.sst===sales) && (!fitv || d.fit===fitv) && (!CATS.size || CATS.has(d.cat)) &&
+  let list = DATA.filter(d => (!preset || PRESETS[preset](d)) && (!filter || d.st===filter) && (!STAGES.size || STAGES.has(stageKey(d.s))) && (!sales || d.sst===sales) && (!fitv || d.fit===fitv) && (!CATS.size || CATS.has(d.cat)) &&
     (!q || [d.c,d.b,d.cat].join(" ").toLowerCase().includes(q)));
   list.sort((x,y) => {
     let a, b;
@@ -241,9 +252,15 @@ function render(){
 
 const fmtDay = iso => new Date(iso.slice(0,10)+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 function start(){
-const stages = [...new Set(DATA.map(d=>d.s).filter(Boolean))].sort();
-  document.getElementById("stage").insertAdjacentHTML("beforeend", stages.map(s=>`<option>${esc(s)}</option>`).join(""));
-  document.getElementById("stage").addEventListener("change", render);
+const skeys = ["Pre-seed","Seed","Pre-Series","Series A","Series B","Series C","Series D","Series E","Series F","Growth","Other"].filter(k => DATA.some(d=>stageKey(d.s)===k));
+  const nstage = k => DATA.filter(d=>stageKey(d.s)===k).length;
+  const slist = document.getElementById("stagelist"), ssum = document.getElementById("stagesum"), sbox = document.getElementById("stagebox");
+  slist.innerHTML = skeys.map((c,i)=>`<label class="ms-opt" for="stg-${i}"><input type="checkbox" id="stg-${i}" value="${esc(c)}"><span>${esc(c)}</span><span class="k">${nstage(c)}</span></label>`).join("");
+  const syncStage = () => { const n = STAGES.size; ssum.textContent = n===0 ? "All stages" : n===1 ? [...STAGES][0] : `${n} stages`; ssum.classList.toggle("on", n>0); };
+  slist.addEventListener("change", e => { const t=e.target; if(t.type!=="checkbox") return; t.checked ? STAGES.add(t.value) : STAGES.delete(t.value); syncStage(); render(); });
+  document.getElementById("stageclear").addEventListener("click", () => { STAGES.clear(); slist.querySelectorAll("input").forEach(i=>i.checked=false); syncStage(); render(); });
+  document.addEventListener("click", e => { if (sbox.open && !sbox.contains(e.target)) sbox.open = false; });
+  document.addEventListener("keydown", e => { if (e.key==="Escape" && sbox.open) { sbox.open=false; ssum.focus(); } });
   document.getElementById("sales").addEventListener("change", render);
   document.getElementById("mkt").addEventListener("change", e => { filter = e.target.value; render(); });
   document.getElementById("fit").addEventListener("change", render);
