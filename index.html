@@ -188,7 +188,7 @@ const STAGES = new Set();
 const stageKey = s => { s = String(s||"").trim(); let m;
   if (/^pre-seed/i.test(s)) return "Pre-seed";
   if (/^seed/i.test(s)) return "Seed";
-  if (/^pre-series/i.test(s)) return "Pre-Series";
+  if ((m = s.match(/^pre-series ([a-z])/i))) { const l = m[1].toUpperCase(); return l==="A" ? "Seed" : "Series " + String.fromCharCode(l.charCodeAt(0)-1); }
   if ((m = s.match(/^series ([a-z])/i))) return "Series " + m[1].toUpperCase();
   if (/^growth/i.test(s)) return "Growth";
   return "Other"; };
@@ -252,7 +252,7 @@ function render(){
 
 const fmtDay = iso => new Date(iso.slice(0,10)+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 function start(){
-const skeys = ["Pre-seed","Seed","Pre-Series","Series A","Series B","Series C","Series D","Series E","Series F","Growth","Other"].filter(k => DATA.some(d=>stageKey(d.s)===k));
+const skeys = ["Pre-seed","Seed","Series A","Series B","Series C","Series D","Series E","Series F","Growth","Other"].filter(k => DATA.some(d=>stageKey(d.s)===k));
   const nstage = k => DATA.filter(d=>stageKey(d.s)===k).length;
   const slist = document.getElementById("stagelist"), ssum = document.getElementById("stagesum"), sbox = document.getElementById("stagebox");
   slist.innerHTML = skeys.map((c,i)=>`<label class="ms-opt" for="stg-${i}"><input type="checkbox" id="stg-${i}" value="${esc(c)}"><span>${esc(c)}</span><span class="k">${nstage(c)}</span></label>`).join("");
