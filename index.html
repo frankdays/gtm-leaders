@@ -108,6 +108,56 @@ td.hq{font-size:13.5px;color:var(--muted)}
 .ms-opt:hover{background:var(--accent-soft)}
 .ms-opt input{flex:0 0 auto;width:14px;height:14px;min-width:0;padding:0;border:0;accent-color:var(--accent);margin:0}
 .ms-opt .k{margin-left:auto;padding-left:12px;font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+/* Search, share link, region filter and the phone layout. */
+.share{font:inherit;font-size:14px;padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);cursor:pointer;white-space:nowrap}
+.share:hover{border-color:var(--muted)}
+.clearall{font:inherit;font-size:13px;color:var(--fg);background:none;border:0;padding:2px 4px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;white-space:nowrap}
+.share:focus-visible,.clearall:focus-visible,.ms-head button:focus-visible,.controls input:focus-visible,.controls select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tally{display:flex;gap:10px;align-items:center}
+.sharebox{display:flex}
+.sharebox input{flex:1 1 auto;min-width:0;font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.ms-btns{display:flex;gap:4px}
+.ms-head .done,.sortm,#cards{display:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:6px;min-width:0}
+.card-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.card-co{font-weight:600;font-size:16px;line-height:1.3;color:var(--fg);text-decoration:none;overflow-wrap:anywhere}
+a.card-co:hover{text-decoration:underline}
+.card-biz{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+.card-meta{display:flex;flex-wrap:wrap;font-size:13px;line-height:1.5}
+.card-meta.mono{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.card-meta span+span::before{content:"·";margin:0 7px;color:var(--muted)}
+.card-leaders{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:4px;font-size:13px;color:var(--muted)}
+.card-leaders .grp{display:inline-flex;align-items:center;gap:6px}
+.card-src{font-size:13px;color:var(--muted);text-underline-offset:3px;justify-self:start}
+#cards .empty{margin:0}
+@media (max-width:760px){
+  body{padding-block:18px 36px}
+  .wrap{gap:16px}
+  .lede{font-size:15px}
+  .summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .stat{padding:10px 10px 12px;border-radius:10px;align-content:start}
+  .stat .n{font-size:24px}
+  .stat .l{font-size:12px;line-height:1.3}
+  .stat .paren{display:none}
+  .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .controls.top{grid-template-columns:minmax(0,1fr) auto}
+  .controls input,.controls select,.ms summary,.share,.sharebox input{font-size:16px}
+  .controls select,.ms summary,.controls input,.ms-menu{box-sizing:border-box}
+  .controls select,.ms summary{width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .ms{position:static;min-width:0}
+  .ms[open]::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:19}
+  .ms-menu{position:fixed;z-index:20;left:12px;right:12px;top:auto;bottom:max(12px,env(safe-area-inset-bottom,0px));width:auto;min-width:0;max-width:none;max-height:70vh;border-radius:14px;padding:8px}
+  .ms-head{padding:6px 8px 10px}
+  .ms-head button{font-size:15px;padding:6px 8px}
+  .ms-head .done{display:inline-block;font-weight:600;text-decoration:none}
+  .ms-opt{padding:11px 8px;font-size:16px;white-space:normal}
+  .ms-opt input{width:18px;height:18px}
+  .sortm{display:block}
+  .tally{justify-content:flex-end;flex-wrap:wrap;gap:4px 10px}
+  .tablebox{display:none}
+  #cards{display:grid;gap:10px}
+  #cards .empty{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+}
 </style>
 
 <div class="wrap">
@@ -122,39 +172,60 @@ td.hq{font-size:13.5px;color:var(--muted)}
 
   <p class="byline">Created by <a href="https://www.linkedin.com/in/frank-days/" target="_blank" rel="noopener" onclick="track('byline-click')">Frank Days</a></p>
 
-  <div class="controls">
+  <div class="controls top">
+    <input type="search" id="q" placeholder="Search company, business, category or city" aria-label="Search accounts" autocomplete="off" spellcheck="false">
+    <button type="button" class="share" id="share">Copy link</button>
+  </div>
+  <div class="sharebox" id="sharebox" hidden><input id="shareurl" readonly aria-label="Link to this view"></div>
+
+  <div class="controls filters">
     <details class="ms" id="stagebox">
       <summary id="stagesum" aria-label="Stages">All stages</summary>
       <div class="ms-menu" role="group" aria-label="Stages">
-        <div class="ms-head"><span>Stages</span><button type="button" id="stageclear">Clear</button></div>
+        <div class="ms-head"><span>Stages</span><span class="ms-btns"><button type="button" id="stageclear">Clear</button><button type="button" class="done">Done</button></span></div>
         <div id="stagelist"></div>
       </div>
     </details>
     <details class="ms" id="catbox">
       <summary id="catsum" aria-label="Categories">All categories</summary>
       <div class="ms-menu" role="group" aria-label="Categories">
-        <div class="ms-head"><span>Categories</span><button type="button" id="catclear">Clear</button></div>
+        <div class="ms-head"><span>Categories</span><span class="ms-btns"><button type="button" id="catclear">Clear</button><button type="button" class="done">Done</button></span></div>
         <div id="catlist"></div>
       </div>
     </details>
+    <details class="ms" id="regionbox">
+      <summary id="regionsum" aria-label="Regions">All regions</summary>
+      <div class="ms-menu" role="group" aria-label="Regions">
+        <div class="ms-head"><span>Regions</span><span class="ms-btns"><button type="button" id="regionclear">Clear</button><button type="button" class="done">Done</button></span></div>
+        <div id="regionlist"></div>
+      </div>
+    </details>
     <select id="mkt" aria-label="Marketing leader">
-      <option value="">Marketing leader: any</option>
-      <option value="yes">Marketing leader: Yes</option>
-      <option value="no">Marketing leader: No</option>
-      <option value="nc">Marketing leader: Needs lookup</option>
+      <option value="" data-s="Marketing: any">Marketing leader: any</option>
+      <option value="yes" data-s="Marketing: Yes">Marketing leader: Yes</option>
+      <option value="no" data-s="Marketing: No">Marketing leader: No</option>
+      <option value="nc" data-s="Marketing: lookup">Marketing leader: Needs lookup</option>
     </select>
     <select id="sales" aria-label="Sales leader">
-      <option value="">Sales leader: any</option>
-      <option value="yes">Sales leader: Yes</option>
-      <option value="no">Sales leader: No</option>
-      <option value="nc">Sales leader: Needs lookup</option>
+      <option value="" data-s="Sales: any">Sales leader: any</option>
+      <option value="yes" data-s="Sales: Yes">Sales leader: Yes</option>
+      <option value="no" data-s="Sales: No">Sales leader: No</option>
+      <option value="nc" data-s="Sales: lookup">Sales leader: Needs lookup</option>
     </select>
     <select id="fit" aria-label="Fit">
-      <option value="">Fit: High and Low</option>
+      <option value="" data-s="Fit: any">Fit: High and Low</option>
       <option value="high">Fit: High</option>
       <option value="low">Fit: Low</option>
     </select>
-    <span class="count" id="count"></span>
+    <select id="sortm" class="sortm" aria-label="Sort">
+      <option value="st">Sort: gaps first</option>
+      <option value="-iso">Sort: newest</option>
+      <option value="-a">Sort: largest</option>
+      <option value="fit">Sort: high fit</option>
+      <option value="c">Sort: A to Z</option>
+      <option value="custom" hidden>Sort: by column</option>
+    </select>
+    <div class="tally"><span class="count" id="count" aria-live="polite"></span><button type="button" class="clearall" id="clearall" hidden>Clear all</button></div>
   </div>
 
   <div class="tablebox">
@@ -175,7 +246,8 @@ td.hq{font-size:13.5px;color:var(--muted)}
       <tbody id="rows"></tbody>
     </table>
   </div>
-  <p class="note">Sources: LinkedIn_Announcements and Fundedcontacts tabs of Funding Search: VC/PE V2, and public company and people data. Marketing leader is Yes for a CMO or a VP or SVP of Marketing; a Head of Marketing alone counts as No. Sales leader is Yes for a CRO, a VP or SVP of Sales or Revenue, a Chief Commercial Officer or similar; a Head of Sales alone counts as No. Clay data can lag recent hires, so a Clay "No" is a first pass, not a confirmed gap. "Needs lookup" means the company has not been looked up yet or could not be matched to a company record. Headquarters comes from the funding announcements and shows "—" where the source did not say.</p>
+  <div id="cards"></div>
+  <p class="note">Sources: LinkedIn_Announcements and Fundedcontacts tabs of Funding Search: VC/PE V2, and public company and people data. Marketing leader is Yes for a CMO or a VP or SVP of Marketing; a Head of Marketing alone counts as No. Sales leader is Yes for a CRO, a VP or SVP of Sales or Revenue, a Chief Commercial Officer or similar; a Head of Sales alone counts as No. Clay data can lag recent hires, so a Clay "No" is a first pass, not a confirmed gap. "Needs lookup" means the company has not been looked up yet or could not be matched to a company record. Headquarters comes from the funding announcements and shows "—" where the source did not say. Region groups headquarters by country; a company that lists two locations appears under both.</p>
 </div>
 
 <script>
@@ -186,10 +258,14 @@ const SLABEL = {yes:"Yes", no:"No", nc:"Needs lookup"};
 const SCLS = {yes:"yes", no:"no", nc:"nc"};
 const SORDER = {no:0, yes:1, nc:2};
 const COLOR = {yes:"var(--yes)", hom:"var(--hom)", no:"var(--no)", unk:"var(--unk)", nc:"var(--line)"};
+// Shared links always open the public, companies-only page, whichever copy they were made from.
+const PUBLIC_URL = "https://frankdays.github.io/gtm-leaders/";
+const $ = id => document.getElementById(id);
 let preset = "";
 const track = name => { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({path:"event/"+name, title:name, event:true}); } catch(e){} };
 const CATS = new Set();
 const STAGES = new Set();
+const REGIONS = new Set();
 const stageKey = s => { s = String(s||"").trim(); let m;
   if (/^pre-seed/i.test(s)) return "Pre-seed";
   if (/^seed/i.test(s)) return "Seed";
@@ -203,16 +279,54 @@ const PRESETS = {
   fresh: d => d.fit==="high" && d.st==="no" && age(d)>=30 && age(d)<=90,
   both: d => d.st==="no" && d.sst==="no"
 };
-let filter = "", sortKey = "st", sortDir = 1;
+let filter = "", sortKey = "st", sortDir = 1, query = "";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const money = a => { const m = String(a).match(/([\d.,]+)\s*(M|B|K)?/i); if(!m) return -1; let v = parseFloat(m[1].replace(/,/g,"")); const u=(m[2]||"").toUpperCase(); if(u==="B") v*=1000; if(u==="K") v/=1000; if(/KRW/.test(a)) v=v/1350*1000; return v; };
+
+/* Region is grouped from the Headquarters text ("San Francisco, CA", "Bengaluru, India", "Paris / New York").
+   The last recognisable place in each location wins; a company listing two locations counts in both. */
+const R = {us:"United States", ca:"Canada", la:"Latin America and Caribbean", uk:"UK and Ireland", eu:"Europe",
+  il:"Israel", mea:"Middle East and Africa", in:"India", ap:"Asia-Pacific"};
+const REGION_ORDER = [R.us, R.ca, R.la, R.uk, R.eu, R.il, R.mea, R.in, R.ap, "Other", "Not specified"];
+const PLACE = {};
+Object.entries({
+  us: "united states|united states of america|usa|us|u.s.|u.s.a.|america|alabama|alaska|arizona|arkansas|california|colorado|connecticut|delaware|florida|georgia|hawaii|idaho|illinois|indiana|iowa|kansas|kentucky|louisiana|maine|maryland|massachusetts|michigan|minnesota|mississippi|missouri|montana|nebraska|nevada|new hampshire|new jersey|new mexico|new york|north carolina|north dakota|ohio|oklahoma|oregon|pennsylvania|rhode island|south carolina|south dakota|tennessee|texas|utah|vermont|virginia|washington|west virginia|wisconsin|wyoming|puerto rico|district of columbia|san francisco|sf|bay area|silicon valley|nyc|new york city|boston|austin|seattle|los angeles|palo alto|chicago|miami|denver|atlanta",
+  ca: "canada|toronto|vancouver|montreal|montréal|ottawa|calgary|waterloo",
+  la: "mexico|brazil|argentina|chile|colombia|peru|uruguay|venezuela|ecuador|bolivia|paraguay|costa rica|panama|guatemala|el salvador|honduras|nicaragua|dominican republic|jamaica|bahamas|barbados|trinidad and tobago|cayman islands|bermuda|british virgin islands|latin america|latam|são paulo|sao paulo|mexico city|buenos aires|bogotá|bogota|santiago",
+  uk: "uk|u.k.|united kingdom|great britain|britain|england|scotland|wales|northern ireland|ireland|london|manchester|cambridge|oxford|edinburgh|dublin",
+  eu: "europe|eu|germany|france|netherlands|the netherlands|holland|sweden|italy|spain|switzerland|belgium|denmark|finland|norway|iceland|austria|portugal|greece|poland|czech republic|czechia|slovakia|hungary|romania|bulgaria|croatia|slovenia|serbia|bosnia and herzegovina|montenegro|north macedonia|albania|kosovo|moldova|ukraine|belarus|lithuania|latvia|estonia|luxembourg|liechtenstein|monaco|malta|cyprus|türkiye|turkiye|turkey|armenia|andorra|berlin|munich|hamburg|paris|amsterdam|stockholm|copenhagen|helsinki|oslo|madrid|barcelona|milan|rome|zurich|zürich|geneva|lisbon|vienna|warsaw|prague|budapest|tallinn|vilnius|riga|brussels|athens|istanbul|kyiv|kiev|bucharest|sofia",
+  il: "israel|tel aviv|tel aviv-yafo|jerusalem|haifa|herzliya",
+  mea: "middle east|mena|gcc|uae|u.a.e.|united arab emirates|saudi arabia|ksa|qatar|bahrain|kuwait|oman|jordan|lebanon|iraq|egypt|morocco|tunisia|algeria|africa|sub-saharan africa|south africa|nigeria|kenya|tanzania|ghana|rwanda|uganda|ethiopia|senegal|ivory coast|côte d'ivoire|cameroon|zambia|zimbabwe|botswana|namibia|mauritius|dubai|abu dhabi|riyadh|doha|cairo|lagos|nairobi|cape town|johannesburg",
+  in: "india|bengaluru|bangalore|mumbai|delhi|new delhi|ncr|delhi ncr|gurugram|gurgaon|noida|hyderabad|chennai|pune|kolkata|ahmedabad|jaipur|kochi",
+  ap: "asia|apac|asia-pacific|asia pacific|southeast asia|singapore|china|hong kong|taiwan|japan|south korea|korea|republic of korea|australia|new zealand|malaysia|indonesia|thailand|vietnam|viet nam|philippines|pakistan|bangladesh|sri lanka|nepal|cambodia|myanmar|mongolia|kazakhstan|uzbekistan|seoul|tokyo|osaka|beijing|shanghai|shenzhen|hangzhou|sydney|melbourne|brisbane|auckland|jakarta|kuala lumpur|bangkok|ho chi minh city|manila|taipei"
+}).forEach(([r, list]) => list.split("|").forEach(p => PLACE[p] = R[r]));
+const US_ST = new Set("AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC PR".split(" "));
+const CA_PR = new Set("AB BC MB NB NL NS NT NU ON PE QC SK YT".split(" "));
+const AU_ST = new Set(["NSW","VIC","QLD","TAS","ACT"]);
+const placeRegion = p => { p = p.trim(); if (!p) return "";
+  if (/^[A-Z]{2,3}$/.test(p)) { if (US_ST.has(p)) return R.us; if (CA_PR.has(p)) return R.ca; if (AU_ST.has(p)) return R.ap; }
+  return PLACE[p.toLowerCase().replace(/\s+/g, " ")] || ""; };
+const regionsOf = hq => { const s = String(hq || "").trim(); if (!s) return ["Not specified"];
+  const out = new Set();
+  s.split(/\s*[\/;|]\s*/).forEach(seg => {
+    const parts = seg.replace(/[()]/g, ",").split(",").map(x => x.trim()).filter(Boolean);
+    let r = ""; for (let i = parts.length - 1; i >= 0 && !r; i--) r = placeRegion(parts[i]);
+    if (r) out.add(r); });
+  return out.size ? [...out] : ["Other"]; };
+
+/* Search matches the start of words in company, business, category, headquarters, region, stage, amount and source. */
+const norm = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
+const tokens = s => norm(s).split(" ").filter(Boolean);
+
+const mq = matchMedia("(max-width: 760px)");
+const canShare = () => mq.matches && typeof navigator.share === "function";
 
 function summary(){
   const el = document.getElementById("summary");
   const nm = DATA.filter(d=>d.st==="no").length, ns = DATA.filter(d=>d.sst==="no").length;
   const salesSel = document.getElementById("sales");
-  const items = [["mk","No marketing leader (CMO, SVP, VP)",nm,"var(--fg)", filter==="no"],["sl","No sales leader (CRO, SVP, VP)",ns,"var(--fg)", salesSel.value==="no"],["both","No marketing or sales leader",DATA.filter(PRESETS.both).length,"var(--fg)", preset==="both"]];
-  el.innerHTML = items.map(([k,l,n,c,on]) => `<button class="stat" type="button" data-f="${k}" aria-pressed="${on}"><span class="n">${n}</span><span class="l">${esc(l)}</span><span class="bar" style="background:${c};width:${Math.max(6, n/DATA.length*100)}%"></span></button>`).join("");
+  const items = [["mk","No marketing leader","(CMO, SVP, VP)",nm,"var(--fg)", filter==="no"],["sl","No sales leader","(CRO, SVP, VP)",ns,"var(--fg)", salesSel.value==="no"],["both","No marketing or sales leader","",DATA.filter(PRESETS.both).length,"var(--fg)", preset==="both"]];
+  el.innerHTML = items.map(([k,l,p,n,c,on]) => `<button class="stat" type="button" data-f="${k}" aria-pressed="${on}"><span class="n">${n}</span><span class="l">${esc(l)}${p ? `<span class="paren"> ${esc(p)}</span>` : ""}</span><span class="bar" style="background:${c};width:${Math.max(6, n/DATA.length*100)}%"></span></button>`).join("");
   el.querySelectorAll(".stat").forEach(b => b.onclick = () => { track("tile-"+b.dataset.f);
     if (b.dataset.f==="mk") { filter = filter==="no" ? "" : "no"; document.getElementById("mkt").value = filter; }
     else if (b.dataset.f==="sl") { salesSel.value = salesSel.value==="no" ? "" : "no"; }
@@ -224,23 +338,7 @@ function people(list){
   return list.map(p => `<span><a href="${esc(p.u)}" target="_blank" rel="noopener">${esc(p.n)}</a> <small>${esc(p.t)}</small></span>`).join("");
 }
 
-function render(){
-  summary();
-  const q = "";
-  const sales = document.getElementById("sales").value;
-  const fitv = document.getElementById("fit").value;
-  let list = DATA.filter(d => (!preset || PRESETS[preset](d)) && (!filter || d.st===filter) && (!STAGES.size || STAGES.has(stageKey(d.s))) && (!sales || d.sst===sales) && (!fitv || d.fit===fitv) && (!CATS.size || CATS.has(d.cat)) &&
-    (!q || [d.c,d.b,d.cat].join(" ").toLowerCase().includes(q)));
-  list.sort((x,y) => {
-    let a, b;
-    if (sortKey==="st"){ a=ORDER[x.st]; b=ORDER[y.st]; if(a===b){ return (y.iso||"").localeCompare(x.iso||""); } }
-    else if (sortKey==="sst"){ a=SORDER[x.sst]; b=SORDER[y.sst]; if(a===b){ a=ORDER[x.st]; b=ORDER[y.st]; } }
-    else if (sortKey==="a"){ a=money(x.a); b=money(y.a); }
-    else { a=(x[sortKey]||"").toLowerCase(); b=(y[sortKey]||"").toLowerCase(); if(a===b){ a=ORDER[x.st]; b=ORDER[y.st]; } }
-    return (a<b?-1:a>b?1:0)*sortDir;
-  });
-  document.getElementById("count").textContent = `${list.length} of ${DATA.length} accounts`;
-  document.getElementById("rows").innerHTML = list.length ? list.map(d => `<tr>
+const row = d => `<tr>
     <td class="co">${d.u ? `<a href="${esc(d.u)}" target="_blank" rel="noopener">${esc(d.c)}</a>` : esc(d.c)}</td>
     <td class="biz">${esc(d.b)}</td>
     <td class="hq">${d.hq ? esc(d.hq) : "—"}</td>
@@ -252,40 +350,141 @@ function render(){
     <td class="deal">${d.dl ? `<a href="${esc(d.dl)}" target="_blank" rel="noopener">${esc(d.src||"Link")}</a>` : esc(d.src)}</td>
     <td><span class="fit ${d.fit}">${d.fit==="high"?"High":"Low"}</span></td>
     <td class="num">${esc(d.d)}</td>
-  </tr>`).join("") : `<tr><td colspan="11" class="empty">No accounts match these filters.</td></tr>`;
+  </tr>`;
+
+const card = d => `<article class="card">
+    <div class="card-top">${d.u ? `<a class="card-co" href="${esc(d.u)}" target="_blank" rel="noopener">${esc(d.c)}</a>` : `<span class="card-co">${esc(d.c)}</span>`}<span class="fit ${d.fit}">${d.fit==="high"?"High fit":"Low fit"}</span></div>
+    ${d.b ? `<p class="card-biz">${esc(d.b)}</p>` : ""}
+    <div class="card-meta mono">${[d.s, d.a, d.d].filter(Boolean).map(x => `<span>${esc(x)}</span>`).join("")}</div>
+    <div class="card-meta">${[d.hq || "HQ not stated", d.cat].filter(Boolean).map(x => `<span>${esc(x)}</span>`).join("")}</div>
+    <div class="card-leaders"><span class="grp">Marketing <span class="pill ${d.st}">${LABEL[d.st]}</span></span><span class="grp">Sales <span class="pill ${SCLS[d.sst]}">${SLABEL[d.sst]}</span></span></div>
+    ${d.dl ? `<a class="card-src" href="${esc(d.dl)}" target="_blank" rel="noopener">Source: ${esc(d.src||"Link")} ↗</a>` : d.src ? `<span class="card-src">Source: ${esc(d.src)}</span>` : ""}
+  </article>`;
+
+/* Shareable view: every filter, the search and the sort live in the address bar. */
+function params(){
+  const p = new URLSearchParams();
+  if (query) p.set("q", query);
+  STAGES.forEach(v => p.append("stage", v));
+  CATS.forEach(v => p.append("cat", v));
+  REGIONS.forEach(v => p.append("region", v));
+  ["mkt","sales","fit"].forEach(id => { const v = $(id).value; if (v) p.set(id, v); });
+  if (preset) p.set("view", preset);
+  if (sortKey!=="st" || sortDir!==1) p.set("sort", (sortDir<0 ? "-" : "") + sortKey);
+  return p.toString();
+}
+const shareURL = () => { const s = params(); return PUBLIC_URL + (s ? "?" + s : ""); };
+function syncURL(){ const s = params(); try { history.replaceState(null, "", s ? "?" + s : location.pathname); } catch(e){} }
+function readURL(skeys, cats, regions){
+  let p; try { p = new URLSearchParams(location.search); } catch(e){ return; }
+  query = (p.get("q") || "").trim(); $("q").value = query;
+  p.getAll("stage").forEach(v => { if (skeys.includes(v)) STAGES.add(v); });
+  p.getAll("cat").forEach(v => { if (cats.includes(v)) CATS.add(v); });
+  p.getAll("region").forEach(v => { if (regions.includes(v)) REGIONS.add(v); });
+  const pick = (id, ok) => { const v = p.get(id); if (ok.includes(v)) $(id).value = v; };
+  pick("mkt", ["yes","no","nc"]); filter = $("mkt").value;
+  pick("sales", ["yes","no","nc"]);
+  pick("fit", ["high","low"]);
+  if (p.get("view")==="both") preset = "both";
+  const m = /^(-?)(c|hq|s|a|cat|st|sst|src|fit|iso)$/.exec(p.get("sort") || "");
+  if (m) { sortKey = m[2]; sortDir = m[1] ? -1 : 1; }
+}
+
+function render(){
+  summary();
+  const toks = tokens(query);
+  const sales = document.getElementById("sales").value;
+  const fitv = document.getElementById("fit").value;
+  let list = DATA.filter(d => (!preset || PRESETS[preset](d)) && (!filter || d.st===filter) && (!STAGES.size || STAGES.has(d._k)) && (!sales || d.sst===sales) && (!fitv || d.fit===fitv) && (!CATS.size || CATS.has(d.cat)) &&
+    (!REGIONS.size || d._r.some(r => REGIONS.has(r))) && (!toks.length || toks.every(t => d._h.includes(" " + t))));
+  list.sort((x,y) => {
+    let a, b;
+    if (sortKey==="st"){ a=ORDER[x.st]; b=ORDER[y.st]; if(a===b){ return (y.iso||"").localeCompare(x.iso||""); } }
+    else if (sortKey==="sst"){ a=SORDER[x.sst]; b=SORDER[y.sst]; if(a===b){ a=ORDER[x.st]; b=ORDER[y.st]; } }
+    else if (sortKey==="a"){ a=money(x.a); b=money(y.a); }
+    else { a=String(x[sortKey]||"").toLowerCase(); b=String(y[sortKey]||"").toLowerCase(); if(a===b){ a=ORDER[x.st]; b=ORDER[y.st]; } }
+    return (a<b?-1:a>b?1:0)*sortDir;
+  });
+  document.getElementById("count").textContent = `${list.length} of ${DATA.length} accounts`;
+  const none = "No accounts match these filters.";
+  if (mq.matches) {
+    $("cards").innerHTML = list.length ? list.map(card).join("") : `<p class="empty">${none}</p>`;
+    $("rows").innerHTML = "";
+  } else {
+    $("rows").innerHTML = list.length ? list.map(row).join("") : `<tr><td colspan="11" class="empty">${none}</td></tr>`;
+    $("cards").innerHTML = "";
+  }
+  $("clearall").hidden = !(query || STAGES.size || CATS.size || REGIONS.size || filter || sales || fitv || preset);
+  const sv = (sortDir<0 ? "-" : "") + sortKey, sm = $("sortm");
+  sm.value = [...sm.options].some(o => o.value===sv) ? sv : "custom";
+  $("sharebox").hidden = true;
+  syncURL();
+}
+
+const MS = [];
+function multi(name, keys, countOf, set, allText, plural, ev){
+  const box = $(name+"box"), sum = $(name+"sum"), list = $(name+"list");
+  list.innerHTML = keys.map((c,i) => `<label class="ms-opt" for="${name}-${i}"><input type="checkbox" id="${name}-${i}" value="${esc(c)}"${set.has(c) ? " checked" : ""}><span>${esc(c)}</span><span class="k">${countOf(c)}</span></label>`).join("");
+  const sync = () => { const n = set.size; sum.textContent = n===0 ? allText : n===1 ? [...set][0] : `${n} ${plural}`; sum.classList.toggle("on", n>0); };
+  const reset = () => { set.clear(); list.querySelectorAll("input").forEach(i => i.checked = false); sync(); };
+  list.addEventListener("change", e => { const t = e.target; if (t.type!=="checkbox") return; t.checked ? set.add(t.value) : set.delete(t.value); if (t.checked) track(ev+"-"+t.value); sync(); render(); });
+  $(name+"clear").addEventListener("click", () => { reset(); render(); });
+  box.querySelector(".done").addEventListener("click", () => { box.open = false; });
+  // A tap outside the menu (or on the dimmed backdrop on phones) closes it without following anything underneath.
+  document.addEventListener("click", e => { if (box.open && (e.target===box || !box.contains(e.target))) box.open = false; });
+  document.addEventListener("keydown", e => { if (e.key==="Escape" && box.open) { box.open = false; sum.focus(); } });
+  sync();
+  MS.push({reset});
+}
+
+function relabel(){
+  document.querySelectorAll("option[data-s]").forEach(o => { if (!o.dataset.l) o.dataset.l = o.textContent; o.textContent = mq.matches ? o.dataset.s : o.dataset.l; });
+  const q = $("q"); if (!q.dataset.l) q.dataset.l = q.placeholder; q.placeholder = mq.matches ? "Search companies or cities" : q.dataset.l;
+  $("share").textContent = canShare() ? "Share" : "Copy link";
 }
 
 const fmtDay = iso => new Date(iso.slice(0,10)+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 function start(){
-const skeys = ["Pre-seed","Seed","Series A","Series B","Series C","Series D","Series E","Series F","Growth","Not specified"].filter(k => DATA.some(d=>stageKey(d.s)===k));
-  const nstage = k => DATA.filter(d=>stageKey(d.s)===k).length;
-  const slist = document.getElementById("stagelist"), ssum = document.getElementById("stagesum"), sbox = document.getElementById("stagebox");
-  slist.innerHTML = skeys.map((c,i)=>`<label class="ms-opt" for="stg-${i}"><input type="checkbox" id="stg-${i}" value="${esc(c)}"><span>${esc(c)}</span><span class="k">${nstage(c)}</span></label>`).join("");
-  const syncStage = () => { const n = STAGES.size; ssum.textContent = n===0 ? "All stages" : n===1 ? [...STAGES][0] : `${n} stages`; ssum.classList.toggle("on", n>0); };
-  slist.addEventListener("change", e => { const t=e.target; if(t.type!=="checkbox") return; t.checked ? STAGES.add(t.value) : STAGES.delete(t.value); if (t.checked) track("stage-"+t.value); syncStage(); render(); });
-  document.getElementById("stageclear").addEventListener("click", () => { STAGES.clear(); slist.querySelectorAll("input").forEach(i=>i.checked=false); syncStage(); render(); });
-  document.addEventListener("click", e => { if (sbox.open && !sbox.contains(e.target)) sbox.open = false; });
-  document.addEventListener("keydown", e => { if (e.key==="Escape" && sbox.open) { sbox.open=false; ssum.focus(); } });
+  DATA.forEach(d => { d._k = stageKey(d.s); d._r = regionsOf(d.hq);
+    d._h = " " + norm([d.c, d.b, d.cat, d.hq, d._r.join(" "), d.s, d.a, d.src].join(" ")); });
+  const skeys = ["Pre-seed","Seed","Series A","Series B","Series C","Series D","Series E","Series F","Growth","Not specified"].filter(k => DATA.some(d=>d._k===k));
+  const cats = [...new Set(DATA.map(d=>d.cat).filter(Boolean))].sort((a,b)=>a==="Other"?1:b==="Other"?-1:a.localeCompare(b));
+  const regions = REGION_ORDER.filter(r => DATA.some(d => d._r.includes(r)));
+  readURL(skeys, cats, regions);
+  multi("stage", skeys, k => DATA.filter(d=>d._k===k).length, STAGES, "All stages", "stages", "stage");
+  multi("cat", cats, c => DATA.filter(d=>d.cat===c).length, CATS, "All categories", "categories", "category");
+  multi("region", regions, r => DATA.filter(d=>d._r.includes(r)).length, REGIONS, "All regions", "regions", "region");
   document.getElementById("sales").addEventListener("change", e => { track("sales-"+(e.target.value||"any")); render(); });
   document.getElementById("mkt").addEventListener("change", e => { filter = e.target.value; track("marketing-"+(filter||"any")); render(); });
   document.getElementById("fit").addEventListener("change", e => { track("fit-"+(e.target.value||"any")); render(); });
-  const cats=[...new Set(DATA.map(d=>d.cat).filter(Boolean))].sort((a,b)=>a==="Other"?1:b==="Other"?-1:a.localeCompare(b));
-  const ncat = c => DATA.filter(d=>d.cat===c).length;
-  const list = document.getElementById("catlist"), sum = document.getElementById("catsum"), box = document.getElementById("catbox");
-  list.innerHTML = cats.map((c,i)=>`<label class="ms-opt" for="cat-${i}"><input type="checkbox" id="cat-${i}" value="${esc(c)}"><span>${esc(c)}</span><span class="k">${ncat(c)}</span></label>`).join("");
-  const syncSum = () => {
-    const n = CATS.size;
-    sum.textContent = n===0 ? "All categories" : n===1 ? [...CATS][0] : `${n} categories`;
-    sum.classList.toggle("on", n>0);
-  };
-  list.addEventListener("change", e => { const t=e.target; if(t.type!=="checkbox") return; t.checked ? CATS.add(t.value) : CATS.delete(t.value); if (t.checked) track("category-"+t.value); syncSum(); render(); });
-  document.getElementById("catclear").addEventListener("click", () => { CATS.clear(); list.querySelectorAll("input").forEach(i=>i.checked=false); syncSum(); render(); });
-  document.addEventListener("click", e => { if (box.open && !box.contains(e.target)) box.open = false; });
-  document.addEventListener("keydown", e => { if (e.key==="Escape" && box.open) { box.open=false; sum.focus(); } });
   document.querySelectorAll("th button").forEach(b => b.onclick = () => { const k=b.dataset.k; track("sort-"+k); sortDir = (sortKey===k) ? -sortDir : (k==="iso"||k==="a" ? -1 : 1); sortKey=k; render(); });
+  $("sortm").addEventListener("change", e => { const v = e.target.value; if (v==="custom") return; sortDir = v[0]==="-" ? -1 : 1; sortKey = v.replace(/^-/, ""); track("sort-"+sortKey); render(); });
+  let qt, searched = false;
+  $("q").addEventListener("input", e => { clearTimeout(qt); qt = setTimeout(() => { query = e.target.value.trim(); if (query && !searched) { searched = true; track("search"); } render(); }, 120); });
+  $("clearall").addEventListener("click", () => { track("clear-all"); query = ""; $("q").value = ""; MS.forEach(m => m.reset());
+    ["mkt","sales","fit"].forEach(id => $(id).value = ""); filter = ""; preset = ""; render(); });
+  $("share").addEventListener("click", async () => {
+    const url = shareURL(), b = $("share");
+    if (canShare()) {
+      track("share-native");
+      try { await navigator.share({title: document.title, url}); return; } catch(e) { if (e && e.name==="AbortError") return; }
+    }
+    track("share-link");
+    let ok = false;
+    try { await navigator.clipboard.writeText(url); ok = true; } catch(e){}
+    if (!ok) { try { const t = document.createElement("textarea"); t.value = url; t.setAttribute("readonly", ""); t.style.cssText = "position:fixed;top:0;left:0;opacity:0"; document.body.appendChild(t); t.select(); ok = document.execCommand("copy"); t.remove(); } catch(e){} }
+    if (ok) { b.textContent = "Link copied"; $("sharebox").hidden = true; }
+    else { $("shareurl").value = url; $("sharebox").hidden = false; $("shareurl").focus(); $("shareurl").select(); b.textContent = "Copy the link below"; }
+    clearTimeout(b._t); b._t = setTimeout(() => { b.textContent = canShare() ? "Share" : "Copy link"; }, 2400);
+  });
+  const onMq = () => { relabel(); render(); };
+  if (mq.addEventListener) mq.addEventListener("change", onMq); else if (mq.addListener) mq.addListener(onMq);
+  relabel();
   render();
 }
-document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">Loading accounts…</td></tr>`;
+const loading = "Loading accounts…";
+document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">${loading}</td></tr>`;
+document.getElementById("cards").innerHTML = `<p class="empty">${loading}</p>`;
 fetch("data.json", {cache:"no-store"}).then(r => { if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }).then(j => {
   DATA = Array.isArray(j) ? j : (j.rows || []);
   const isos = DATA.map(d=>d.iso).filter(Boolean).sort();
@@ -293,7 +492,9 @@ fetch("data.json", {cache:"no-store"}).then(r => { if(!r.ok) throw new Error("HT
   if (isos.length) eb.textContent = `Funding Search · ${fmtDay(isos[0])} to ${fmtDay(isos[isos.length-1])}`;
   start();
 }).catch(e => {
-  document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">The account list could not load (${esc(e.message)}). Reload the page to try again.</td></tr>`;
+  const msg = `The account list could not load (${esc(e.message)}). Reload the page to try again.`;
+  document.getElementById("rows").innerHTML = `<tr><td colspan="11" class="empty">${msg}</td></tr>`;
+  document.getElementById("cards").innerHTML = `<p class="empty">${msg}</p>`;
 });
 </script>
 <script data-goatcounter="https://frankdays.goatcounter.com/count"
