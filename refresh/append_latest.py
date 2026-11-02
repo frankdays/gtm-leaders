@@ -12,7 +12,7 @@ sheet; the script tells them apart by their header row.
 - Funded Contacts sheets are what the sync copies into the Fundedcontacts tab. Rows are appended
   by header name ("Marketing Exec" goes into "Marketing Seat"), skipping any row whose company and
   LinkedIn URL (or company and contact name when there is no URL) are already there. This lets
-  gtm_prep.py reuse the Funding Search LinkedIn lookup instead of searching Clay again.
+  gtm_prep.py use the Funding Search LinkedIn lookup instead of adding the company as Needs lookup.
 
 Everything is appended to the LOCAL working copy of fs.xlsx, never to the Drive spreadsheet.
 """

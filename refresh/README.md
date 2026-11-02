@@ -19,9 +19,10 @@ refresh runs after noon ET.
 - Append only. Never change or delete an existing row in data.json, and never edit the spreadsheet.
 - Rows cover deals announced on or after Jul 1, 2026. Acquisitions, mergers, IPOs, debt and bridge
   rounds are left out (gtm_prep.py applies this).
-- Clay: searches only (`search-companies`, `search-contacts`). Never call add-contact-data-points,
-  add-company-data-points or any other enrichment. No ConnectSafely or LinkedIn calls at all.
-- Companies are listed by name; people only by name, title and public LinkedIn URL from Clay or the
+- No Clay, ConnectSafely, LinkedIn or web lookups of any kind. Leaders come only from the Fundedcontacts
+  tab (the daily Funding Search task's LinkedIn lookup). Companies without that data are added as
+  "Needs lookup".
+- Companies are listed by name; people only by name, title and public LinkedIn URL from the
   Fundedcontacts tab. No emails or phone numbers.
 - The GitHub copy never contains people: only the output of make_public.py is pushed.
 
@@ -29,7 +30,7 @@ refresh runs after noon ET.
 
 1. **Scripts.** Make a working folder OUTSIDE the repo checkout (for example `/tmp/gtm`) and copy
    `refresh/gtm_prep.py`, `refresh/gtm_merge.py` and `refresh/make_public.py` from this repo into it.
-   Every file in steps 2 to 7 (fs.xlsx, work.json, lookups.json and the rest) goes in that folder, never
+   Every file in steps 2 to 7 (fs.xlsx, work.json, cats.json and the rest) goes in that folder, never
    in the repo: they hold people data. `pip install openpyxl --break-system-packages` if the import fails.
 2. **Current page data.** Artifact `read` with the page url
    (no path) first, so the later publish is allowed. Then Artifact `read` with the same url and
@@ -53,9 +54,9 @@ refresh runs after noon ET.
    the missing rows to the LOCAL fs.xlsx only (LinkedIn_Announcements and Fundedcontacts tabs), skips rows
    already in the tabs, and never touches Drive. Then go on to step 4. Say in the report that the sync was
    bridged and how many deal and contact rows were appended. Companies whose contacts were bridged reuse the
-   Funding Search lookup; only the rest take the Clay lookup in step 6.
+   Funding Search lookup; the rest are added as "Needs lookup".
 4. **New companies.** `python3 gtm_prep.py fs.xlsx <data.json path> work.json`. It prints each company
-   not yet on the page and whether it needs a Clay lookup. If it finds none, stop: publish nothing and
+   not yet on the page and whether Funding Search leader data exists for it. If it finds none, stop: publish nothing and
    report "No new funded companies today."
 5. **Categories.** For every company in work.json, pick exactly one category from this list, using the
    Business line: AI infrastructure and models; Agriculture and food; Consumer and retail; Cybersecurity;
@@ -64,30 +65,12 @@ refresh runs after noon ET.
    chain; Legal and compliance; Media, gaming and entertainment; Mobility and transportation; Real estate
    and proptech; Robotics and autonomy; Sales, marketing and CX; Semiconductors and hardware; Other.
    Write `cats.json` as `{"<company name exactly as in work.json>": "<category>"}`.
-6. **Clay lookups** (only entries with `needs_clay: true`). Each company's leaders are looked up once:
-   companies the daily Funding Search task already searched on LinkedIn (including the ones where it found no
-   marketing or sales leader) come from the Fundedcontacts tab and never go to Clay. Clay covers only the
-   companies Funding Search did not search, or whose search failed, was throttled or found no company match.
-   Never run a Clay lookup for an entry with `needs_clay: false`. Load the Clay tools with ToolSearch
-   `select:mcp__Clay__search-companies,mcp__Clay__search-contacts`.
-   a. Match the company: `search-companies` with
-      `select from companies where description contains "<distinctive name word>" limit 5`; add
-      `and description contains "<one key business word>"` when the name is a common word. Accept a result
-      only when its name matches the company and its description fits the Business line (and its country
-      fits the Location when given). Otherwise try one variant (the other name word, or the business word
-      alone with the name word). Still no clear match: record `{"u": "", "clay": "nomatch", "people": []}`.
-      Never guess.
-   b. Leaders: for matched companies, call `search-contacts` with up to 10 company LinkedIn URLs per call
-      and exactly this query (keyword titles, not is_similar_to, which returns junior marketers first):
-      `select from people where experiences.any(is_current = true and (job_title contains ("CMO", "Chief Marketing Officer", "VP Marketing", "VP of Marketing", "Vice President of Marketing", "SVP Marketing", "Head of Marketing", "Marketing Director", "Director of Marketing", "Head of Growth") or job_title contains ("CRO", "Chief Revenue Officer", "Chief Commercial Officer", "VP Sales", "VP of Sales", "Vice President of Sales", "SVP Sales", "Head of Sales", "Sales Director", "Head of Revenue")))`
-      If a page reports `hasMore: true`, load the next pages with load-more-search-results.
-   c. Write `lookups.json`: `{"<company name>": {"u": "<company LinkedIn URL>", "clay": "yes", "people":
-      [{"n": "<name>", "t": "<latest_experience_title>", "u": "<profile url>"}]}}`, keeping only people whose
-      latest_experience_company is this company. A matched company with nobody found still gets `"clay":
-      "yes"` and an empty people list (the page then shows No). gtm_merge.py decides Yes or No from the titles.
-   d. If Clay is down or errors twice in a row, mark the remaining companies `nomatch` (they show as
-      "Needs lookup") and say so in the report.
-7. **Merge.** `python3 gtm_merge.py <data.json path> work.json lookups.json cats.json data_out.json`.
+6. **No leader lookups.** Entries with `needs_lookup: false` take their leaders from the Fundedcontacts tab
+   (gtm_merge.py does this, including companies where Funding Search searched and found no marketing or sales
+   leader, which show as No). Entries with `needs_lookup: true` are added as "Needs lookup". Do not search for
+   their leaders anywhere: no Clay, no ConnectSafely or LinkedIn, no web search.
+7. **Merge.** `python3 gtm_merge.py <data.json path> work.json - cats.json data_out.json` (the `-` means there
+   is no lookups file).
    Check its printout: row count before plus added equals after, and no PROBLEM lines left unexplained.
 8. **Publish** only the data file: Artifact publish with `url` = the page url,
    `file_path` = the index.html saved in step 2 (unchanged), and `files` = `{"data.json": "<data_out.json path>"}`.
@@ -105,5 +88,5 @@ refresh runs after noon ET.
    never push anything other than index.html, data.json and .nojekyll. If the push is refused, do not
    retry with other methods; give the exact error in the report (the claude.ai page is still updated).
 10. **Report** in a few lines: companies added (high fit first), how many have no marketing leader, the
-    high-fit ones with no marketing leader by name, any "Needs lookup" companies, whether the GitHub copy
+    high-fit ones with no marketing leader by name, how many companies were added as "Needs lookup" (name the high-fit ones), whether the GitHub copy
     was pushed, and any errors.

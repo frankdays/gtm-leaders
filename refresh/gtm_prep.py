@@ -4,8 +4,9 @@ Usage: python3 gtm_prep.py <funding_search.xlsx> <data.json> <work.json>
 
 Reads the LinkedIn_Announcements and Fundedcontacts tabs of "Funding Search: VC/PE V2",
 compares them with the page's data.json, and writes work.json: one entry per company that
-is not on the page yet, with every field filled except the category and, for companies
-without usable Fundedcontacts rows, the leader lookup (done in Clay by the agent).
+is not on the page yet, with every field filled except the category. Leaders come only from
+the Fundedcontacts tab; companies without usable Fundedcontacts rows get needs_lookup = true and
+are added to the page as "Needs lookup" (no Clay or other lookups).
 """
 import datetime
 import json
@@ -145,12 +146,12 @@ def main(xlsx, data_path, out_path):
         seat = clean(people[0].get("Marketing Seat")) if people else ""
         named = any(clean(p.get("Contact Name")) for p in people)
         notes = " ".join(clean(p.get("Notes")) for p in people).lower()
-        # Funding Search already ran a LinkedIn people search and found no leader: trust that "No"
-        # instead of searching again in Clay. Failed, throttled or skipped searches still go to Clay.
+        # Funding Search already ran a LinkedIn people search and found no leader: show that "No".
+        # Failed, throttled or skipped searches have no usable result and show as Needs lookup.
         searched_empty = (seat.lower().startswith("no") and not named
                           and not re.search(r"throttl|recheck|fail|not found|not a good fit", notes))
         usable = bool(people and seat and seat.lower() != "unknown" and (named or searched_empty))
-        entry = {"row": row, "needs_clay": not usable}
+        entry = {"row": row, "needs_lookup": not usable}
         if usable:
             row["u"] = next((clean(p.get("Company LinkedIn")) for p in people if clean(p.get("Company LinkedIn"))), "")
             entry["fundedcontacts"] = [{
@@ -160,11 +161,11 @@ def main(xlsx, data_path, out_path):
         work.append(entry)
 
     json.dump(work, open(out_path, "w"), indent=1, ensure_ascii=False)
-    n_clay = sum(1 for w in work if w["needs_clay"])
-    print(f"new companies: {len(work)} ({n_clay} need a Clay lookup, {len(work) - n_clay} from Fundedcontacts); skipped: {skipped}")
+    n_none = sum(1 for w in work if w["needs_lookup"])
+    print(f"new companies: {len(work)} ({len(work) - n_none} from Fundedcontacts, {n_none} added as Needs lookup); skipped: {skipped}")
     for w in work:
         r = w["row"]
-        print(f"  {r['iso']} | {r['fit']} | {r['c']} | {r['s']} | {r['b']} | clay={'yes' if w['needs_clay'] else 'no'}")
+        print(f"  {r['iso']} | {r['fit']} | {r['c']} | {r['s']} | {r['b']} | leaders={'Needs lookup' if w['needs_lookup'] else 'Fundedcontacts'}")
 
 
 if __name__ == "__main__":

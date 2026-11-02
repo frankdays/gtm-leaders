@@ -1,9 +1,9 @@
 """Who needs GTM leaders? page refresh, step 2 of 2.
 
-Usage: python3 gtm_merge.py <data.json> <work.json> <lookups.json> <cats.json> <out_data.json>
+Usage: python3 gtm_merge.py <data.json> <work.json> - <cats.json> <out_data.json>
 
-lookups.json: {"<company name exactly as in work.json>": {"u": "<company LinkedIn URL or ''>",
-               "clay": "yes" | "nomatch", "people": [{"n": name, "t": title, "u": profile URL}, ...]}}
+The third argument is "-": leaders come only from the Fundedcontacts data in work.json, and companies
+marked needs_lookup are added as "Needs lookup". (An old-format lookups.json is still read if given.)
 cats.json:    {"<company name>": "<one of CATEGORIES>"}
 
 Classifies leader titles, fills st/sst/ml/sl/lead, appends the new rows to data.json's rows
@@ -115,7 +115,7 @@ def main(data_path, work_path, lookups_path, cats_path, out_path):
             problems.append(f"{name}: category '{cat}' is not in the list; set to Other")
             cat = "Other"
         row["cat"] = cat
-        if not w["needs_clay"]:
+        if not w.get("needs_lookup", w.get("needs_clay")):
             from_fundedcontacts(row, w.get("fundedcontacts", []))
         else:
             lk = lookups.get(name)
