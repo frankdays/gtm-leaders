@@ -45,11 +45,15 @@ refresh runs after noon ET.
 3b. **Bridge a stale sync.** If, after those tries, any "Funding Deals YYYY-MM-DD" sheet modified since the
    newest date in the LinkedIn_Announcements tab (check the last 3 days, not only today) has rows that the tab
    lacks, download each such sheet with `download_file_content` (same exportMimeType, base64-decode into
-   `latest_<date>.xlsx` in the working folder) and run
-   `python3 append_latest.py fs.xlsx latest_<date>.xlsx ...` (copy it to the working folder in step 1; use a
-   Python that has openpyxl). It appends the missing rows to the LOCAL fs.xlsx only, skips rows already in the
-   tab, and never touches Drive. Then go on to step 4. Say in the report that the sync was bridged and how many
-   rows were appended. Rows added this way get no Fundedcontacts data, so they take the Clay lookup in step 6.
+   `latest_<date>.xlsx` in the working folder). Also download the "Funded Contacts YYYY-MM-DD" sheet for each
+   of those dates, if it exists, into `contacts_<date>.xlsx` (it holds the Funding Search LinkedIn lookup for
+   those companies). Then run
+   `python3 append_latest.py fs.xlsx latest_<date>.xlsx contacts_<date>.xlsx ...` (copy it to the working folder
+   in step 1; use a Python that has openpyxl). It tells the two kinds of sheet apart by their headers, appends
+   the missing rows to the LOCAL fs.xlsx only (LinkedIn_Announcements and Fundedcontacts tabs), skips rows
+   already in the tabs, and never touches Drive. Then go on to step 4. Say in the report that the sync was
+   bridged and how many deal and contact rows were appended. Companies whose contacts were bridged reuse the
+   Funding Search lookup; only the rest take the Clay lookup in step 6.
 4. **New companies.** `python3 gtm_prep.py fs.xlsx <data.json path> work.json`. It prints each company
    not yet on the page and whether it needs a Clay lookup. If it finds none, stop: publish nothing and
    report "No new funded companies today."
@@ -60,7 +64,11 @@ refresh runs after noon ET.
    chain; Legal and compliance; Media, gaming and entertainment; Mobility and transportation; Real estate
    and proptech; Robotics and autonomy; Sales, marketing and CX; Semiconductors and hardware; Other.
    Write `cats.json` as `{"<company name exactly as in work.json>": "<category>"}`.
-6. **Clay lookups** (only entries with `needs_clay: true`). Load the Clay tools with ToolSearch
+6. **Clay lookups** (only entries with `needs_clay: true`). Each company's leaders are looked up once:
+   companies the daily Funding Search task already searched on LinkedIn (including the ones where it found no
+   marketing or sales leader) come from the Fundedcontacts tab and never go to Clay. Clay covers only the
+   companies Funding Search did not search, or whose search failed, was throttled or found no company match.
+   Never run a Clay lookup for an entry with `needs_clay: false`. Load the Clay tools with ToolSearch
    `select:mcp__Clay__search-companies,mcp__Clay__search-contacts`.
    a. Match the company: `search-companies` with
       `select from companies where description contains "<distinctive name word>" limit 5`; add

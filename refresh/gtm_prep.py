@@ -143,7 +143,13 @@ def main(xlsx, data_path, out_path):
         }
         people = fc.get(k, [])
         seat = clean(people[0].get("Marketing Seat")) if people else ""
-        usable = people and seat and seat.lower() != "unknown" and any(clean(p.get("Contact Name")) for p in people)
+        named = any(clean(p.get("Contact Name")) for p in people)
+        notes = " ".join(clean(p.get("Notes")) for p in people).lower()
+        # Funding Search already ran a LinkedIn people search and found no leader: trust that "No"
+        # instead of searching again in Clay. Failed, throttled or skipped searches still go to Clay.
+        searched_empty = (seat.lower().startswith("no") and not named
+                          and not re.search(r"throttl|recheck|fail|not found|not a good fit", notes))
+        usable = bool(people and seat and seat.lower() != "unknown" and (named or searched_empty))
         entry = {"row": row, "needs_clay": not usable}
         if usable:
             row["u"] = next((clean(p.get("Company LinkedIn")) for p in people if clean(p.get("Company LinkedIn"))), "")
